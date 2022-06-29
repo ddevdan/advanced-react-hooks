@@ -42,25 +42,20 @@ function useAsync(asyncCallback) {
     error: null,
   })
 
-
-  React.useEffect(() => {
-    console.log("oi")
-    const promise = asyncCallback()
-    if (!promise) {
-      return
-    }
-
+  const run = React.useCallback(promise => {
     dispatch({ type: 'pending' })
-
     promise.then(
-      (data) => dispatch({ type: 'resolved', data }),
-      (error) => dispatch({ type: 'rejected', error })
+      data => {
+        dispatch({ type: 'resolved', data })
+      },
+      error => {
+        dispatch({ type: 'rejected', error })
+      },
     )
+  }, [])
 
-  }, [asyncCallback])
 
-
-  return state
+  return { state, run }
 
   // -------------------------- start --------------------------
 
@@ -75,17 +70,16 @@ function PokemonInfo({ pokemonName }) {
   // function useAsync(asyncCallback, dependencies) {/* code in here */}
 
 
-  // 🐨 here's how you'll use the new useAsync hook you're writing:
+  const { state, run } = useAsync({ status: pokemonName ? 'pending' : 'idle' })
 
+  React.useEffect(() => {
+    if (!pokemonName) {
+      return
+    }
+    const pokemonPromise = fetchPokemon(pokemonName)
+    run(pokemonPromise)
 
-  const asyncCallback = React.useCallback(() => {
-      if (!pokemonName) {
-        return
-      }
-      return fetchPokemon(pokemonName)
-    },
-    [pokemonName])
-  const state = useAsync(asyncCallback)
+  }, [pokemonName, run])
 
   const { data, status, error } = state
 
