@@ -32,7 +32,7 @@ function dataReducer(state, action) {
 }
 
 
-function useAsync(asyncCallback, dependencies) {
+function useAsync(asyncCallback) {
 
 
   const [state, dispatch] = React.useReducer(dataReducer, {
@@ -44,6 +44,7 @@ function useAsync(asyncCallback, dependencies) {
 
 
   React.useEffect(() => {
+    console.log("oi")
     const promise = asyncCallback()
     if (!promise) {
       return
@@ -56,7 +57,7 @@ function useAsync(asyncCallback, dependencies) {
       (error) => dispatch({ type: 'rejected', error })
     )
 
-  }, dependencies)
+  }, [asyncCallback])
 
 
   return state
@@ -75,13 +76,17 @@ function PokemonInfo({ pokemonName }) {
 
 
   // 🐨 here's how you'll use the new useAsync hook you're writing:
-  const state = useAsync(() => {
-    if (!pokemonName) {
-      return
-    }
-    return fetchPokemon(pokemonName)
-  }, [pokemonName])
-  // 🐨 this will change from "pokemon" to "data"
+
+
+  const asyncCallback = React.useCallback(() => {
+      if (!pokemonName) {
+        return
+      }
+      return fetchPokemon(pokemonName)
+    },
+    [pokemonName])
+  const state = useAsync(asyncCallback)
+
   const { data, status, error } = state
 
   switch (status) {
