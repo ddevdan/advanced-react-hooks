@@ -25,8 +25,16 @@ const CountProvider = ({ children }) => {
 }
 
 const useCount = () => {
-  const [count, setCount] = React.useContext(CountContext);
-  return [count, setCount]
+  const context = React.useContext(CountContext)
+
+  debugger
+  if (context) {
+    const [count, setCount] = context;
+    return [count, setCount]
+  }
+
+  throw Error("The component need to be a child of a context provider")
+
 
 }
 
@@ -52,8 +60,8 @@ function App() {
        🐨 wrap these two components in the CountProvider so they can access
        the CountContext value
        */}
+      <CountDisplay/>
       <CountProvider>
-        <CountDisplay/>
         <Counter/>
       </CountProvider>
     </div>
